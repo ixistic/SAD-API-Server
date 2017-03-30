@@ -11,4 +11,5 @@ Things you may want to cover:
 ```console
 $ git clone https://github.com/ixistic/SAD-API-Server.git
 $ npm install
+$ npm start or $ DEBUG=server:* npm start
 ```
