@@ -4,9 +4,13 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var jwt = require("jwt-simple");
+var auth = require("./auth.js")();
+var users = require("./users.js");
+var cfg = require("./config.js");
 
 var index = require('./routes/index');
-var users = require('./routes/users');
+// var users = require('./routes/users');
 
 var app = express();
 
@@ -21,9 +25,48 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(auth.initialize());
 
 app.use('/', index);
-app.use('/users', users);
+// app.use('/users', users);
+
+
+
+app.get("/", function(req, res) {
+    res.json({
+        status: "My API is alive!"
+    });
+});
+
+app.get("/user", auth.authenticate(), function(req, res) {
+    res.json(users[0]);
+    //res.json(users[req.user.id]);
+});
+
+app.post("/token", function(req, res) {
+    if (req.body.email && req.body.password) {
+        var email = req.body.email;
+        var password = req.body.password;
+        var user = users.find(function(u) {
+            return u.email === email && u.password === password;
+        });
+        if (user) {
+            var payload = {
+                id: user.id
+            };
+            var token = jwt.encode(payload, cfg.jwtSecret);
+            res.json({
+                token: token
+            });
+        } else {
+            res.sendStatus(401);
+        }
+    } else {
+        res.sendStatus(401);
+    }
+});
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
