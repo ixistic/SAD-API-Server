@@ -58,3 +58,5 @@ typings/
 .env
 
 *un~
+
+.DS_Store
