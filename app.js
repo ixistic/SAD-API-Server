@@ -4,14 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var jwt = require("jwt-simple");
-var auth = require("./auth.js")();
-var users = require("./users.js");
-var cfg = require("./config.js");
-var request = require('request');
+var auth = require("./authentication/auth.js")();
 
 var index = require('./routes/index');
-// var users = require('./routes/users');
+var users = require('./routes/users');
 
 var app = express();
 
@@ -29,52 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(auth.initialize());
 
 app.use('/', index);
-// app.use('/users', users);
-
-
-
-app.get("/", function(req, res) {
-    res.json({
-        status: "My API is alive!"
-    });
-});
-
-app.get("/user", auth.authenticate(), function(req, res) {
-    res.json(users[0]);
-    //res.json(users[req.user.id]);
-});
-
-app.post("/token", function(req, res) {
-    var auth_status = false;
-	request({
-	  method: 'GET',
-	  url: 'https://aitsgqueues.mrteera.com/messages/erp_response',
-	  headers: {
-		'Content-Type': 'application/json'
-	  }
-	}, function (error, auth_resp, resp_body) {
-	  console.log('Status:', auth_resp.statusCode);
-	  console.log('Headers:', JSON.stringify(auth_resp.headers));
-	  console.log('Response:', resp_body);
-      var auth_body = JSON.parse(JSON.parse(resp_body).message);
-	  var gid = auth_body.gid;
-      if (auth_body.auth == "ok") {
-        auth_status = true;
-		console.log(auth_status);
-        var payload = {
-          id: gid
-        };
-		var token = jwt.encode(payload, cfg.jwtSecret);
-        res.json({
-          token: token
-        });
-      } else {
-        res.sendStatus(401);
-      }
-	});
-});
-
-
+app.use('/', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
