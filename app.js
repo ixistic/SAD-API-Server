@@ -8,6 +8,7 @@ var jwt = require("jwt-simple");
 var auth = require("./auth.js")();
 var users = require("./users.js");
 var cfg = require("./config.js");
+var request = require('request');
 
 var index = require('./routes/index');
 // var users = require('./routes/users');
@@ -44,26 +45,33 @@ app.get("/user", auth.authenticate(), function(req, res) {
 });
 
 app.post("/token", function(req, res) {
-    if (req.body.email && req.body.password) {
-        var email = req.body.email;
-        var password = req.body.password;
-        var user = users.find(function(u) {
-            return u.email === email && u.password === password;
+    var auth_status = false;
+	request({
+	  method: 'GET',
+	  url: 'https://aitsgqueues.mrteera.com/messages/erp_response',
+	  headers: {
+		'Content-Type': 'application/json'
+	  }
+	}, function (error, auth_resp, resp_body) {
+	  console.log('Status:', auth_resp.statusCode);
+	  console.log('Headers:', JSON.stringify(auth_resp.headers));
+	  console.log('Response:', resp_body);
+      var auth_body = JSON.parse(JSON.parse(resp_body).message);
+	  var gid = auth_body.gid;
+      if (auth_body.auth == "ok") {
+        auth_status = true;
+		console.log(auth_status);
+        var payload = {
+          id: gid
+        };
+		var token = jwt.encode(payload, cfg.jwtSecret);
+        res.json({
+          token: token
         });
-        if (user) {
-            var payload = {
-                id: user.id
-            };
-            var token = jwt.encode(payload, cfg.jwtSecret);
-            res.json({
-                token: token
-            });
-        } else {
-            res.sendStatus(401);
-        }
-    } else {
+      } else {
         res.sendStatus(401);
-    }
+      }
+	});
 });
 
 
