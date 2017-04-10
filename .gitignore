@@ -60,3 +60,5 @@ typings/
 *un~
 
 .DS_Store
+
+.idea
