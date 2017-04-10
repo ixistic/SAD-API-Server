@@ -1,9 +1,9 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
   var Guard = sequelize.define('Guard', {
-    gid: { type:Sequelize.STRING, allowNull: false },
-    name: { type:Sequelize.STRING, allowNull: false },
-    token: { type:Sequelize.STRING, allowNull: false },
+    gid: { type:DataTypes.STRING, allowNull: false },
+    name: { type:DataTypes.STRING, allowNull: false },
+    token: { type:DataTypes.STRING, allowNull: false },
   }, {
     classMethods: {
       associate: function(models) {
