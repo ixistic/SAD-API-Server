@@ -15,6 +15,18 @@ var jwt = require("jwt-simple");
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+function deleteMessageFromERPResponseQueue(message_id) {
+  request({
+    method: 'DELETE',
+    url: 'https://aitsgqueues.mrteera.com/messages/erp_response/' + message_id,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }, function (error, auth_resp, resp_body) {
+    console.log('Deleted message_id: ' + message_id);
+  });
+}
+
 function pollingAuth() {
   request({
     method: 'GET',
@@ -27,10 +39,11 @@ function pollingAuth() {
       console.log('Status:', auth_resp.statusCode);
       console.log('Headers:', JSON.stringify(auth_resp.headers));
       console.log('Response:', resp_body);
+      var message_id = JSON.parse(resp_body).id;
       var auth_body = JSON.parse(JSON.parse(resp_body).message);
       var gid = auth_body.gid;
       var g_name = auth_body.name;
-      if (auth_body.auth == "ok") {
+      if (auth_body.auth == "true") {
         var payload = {
           gid: gid
         };
@@ -43,11 +56,13 @@ function pollingAuth() {
             }));
             console.log("ok 200 send token");
             //TODO FCM send message (success with token)
+            deleteMessageFromERPResponseQueue(message_id);
             //TODO delete queue message
           })
       } else {
         //TODO FCM send message (fail)
         //TODO delete queue message
+        deleteMessageFromERPResponseQueue(message_id);
         console.log("fail 401");
       }
     }
