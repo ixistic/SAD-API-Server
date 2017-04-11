@@ -6,6 +6,7 @@ var users = require("../authentication/users.js");
 var cfg = require("../authentication/config.js");
 var jwt = require("jwt-simple");
 var request = require('request');
+var jsesc = require('jsesc');
 
 router.get("/user", auth.authenticate(), function (req, res) {
   res.json(users[0]);
@@ -13,10 +14,19 @@ router.get("/user", auth.authenticate(), function (req, res) {
 });
 
 router.post("/token", function (req, res) {
-  //todo - post message to queue
-  res.json({
-    message: "loggin in"
-  });
+  var req_message = jsesc(req.body);
+  payload = {
+    "qname": "erp_request",
+    "message": req_message
+  };
+  request.post({
+    url: 'https://aitsgqueues.mrteera.com/messages/erp_request',
+    form: payload
+  }, function(err,httpResponse,body){
+    res.json({
+      message: "logging in"
+    });
+  })
 });
 
 module.exports = router;
