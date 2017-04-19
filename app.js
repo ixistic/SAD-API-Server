@@ -11,6 +11,7 @@ var users = require("./authentication/users.js");
 var cfg = require("./authentication/config.js");
 var request = require('request');
 var jwt = require("jwt-simple");
+var FCM = require('fcm-node');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -24,6 +25,28 @@ function deleteMessageFromERPResponseQueue(message_id) {
     }
   }, function (error, auth_resp, resp_body) {
     console.log('Deleted message_id: ' + message_id);
+  });
+}
+
+function sendFcmMessage(message,device_token,access_token) {
+  var serverKey = 'AAAALDv0PMk:APA91bFz8ZKJVrqd6AVaaLJLPYU7UVaIhco4_DUzZft76tcttwf88SfVXEIhmZtS1MRW_WyppFU9I75mh9qsz1R7ARGPivFB3d7NJzOzcP9Qt8LHikDVz6tYVB42VqO-INJRfZLgnfS4'; //put your server key here
+  var fcm = new FCM(serverKey);
+
+  var message = {
+      to: device_token,
+
+      data: {
+          access_token: access_token,
+          status: message
+      }
+  };
+
+  fcm.send(message, function(err, response){
+      if (err) {
+          console.log("Something has gone wrong!");
+      } else {
+          console.log("Successfully sent with response: ", response);
+      }
   });
 }
 
@@ -43,6 +66,7 @@ function pollingAuth() {
       var auth_body = JSON.parse(JSON.parse(resp_body).message);
       var gid = auth_body.gid;
       var g_name = auth_body.name;
+      var device_token = auth_body.device_token;
       if (auth_body.auth == "true") {
         var payload = {
           gid: gid
@@ -54,16 +78,14 @@ function pollingAuth() {
             console.log(guard.get({
               plain: true
             }));
-            console.log("ok 200 send token");
-            //TODO FCM send message (success with token)
+            console.log("200 OK");
+            sendFcmMessage("200 OK",device_token,token);
             deleteMessageFromERPResponseQueue(message_id);
-            //TODO delete queue message
           })
       } else {
-        //TODO FCM send message (fail)
-        //TODO delete queue message
+        sendFcmMessage("401 Unauthorized",device_token,"");
         deleteMessageFromERPResponseQueue(message_id);
-        console.log("fail 401");
+        console.log("401 Unauthorized");
       }
     }
   });
