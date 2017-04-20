@@ -79,11 +79,13 @@ function pollingAuth() {
               plain: true
             }));
             console.log("200 OK");
-            sendFcmMessage("200 OK",device_token,token);
+            if(device_token)
+              sendFcmMessage("200 OK",device_token,token);
             deleteMessageFromERPResponseQueue(message_id);
           })
       } else {
-        sendFcmMessage("401 Unauthorized",device_token,"");
+        if(device_token)
+          sendFcmMessage("401 Unauthorized",device_token,"");
         deleteMessageFromERPResponseQueue(message_id);
         console.log("401 Unauthorized");
       }
