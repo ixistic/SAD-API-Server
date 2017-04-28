@@ -36,4 +36,7 @@ def erp_put_message_back_into_resp_queue(message, message_id):
 
 if __name__ == '__main__':
     message, message_id = erp_process_message_from_req_queue()
-    erp_put_message_back_into_resp_queue(message, message_id)
+    if message and message_id:
+        erp_put_message_back_into_resp_queue(message, message_id)
+    else:
+        print("No message or message_id")
