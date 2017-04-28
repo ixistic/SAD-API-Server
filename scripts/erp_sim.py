@@ -11,7 +11,7 @@ def erp_process_message_from_req_queue():
 
     if ('{}' == str(message_from_req)):
         print('No message in the queue: ' + str(message_from_req))
-        return None
+        return None, None
     else:
         print('Found a message in the queue: ' + str(message_from_req))
         message_id = message_from_req['id']
