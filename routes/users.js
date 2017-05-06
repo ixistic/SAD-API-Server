@@ -7,13 +7,19 @@ var cfg = require("../authentication/config.js");
 var jwt = require("jwt-simple");
 var request = require('request');
 var jsesc = require('jsesc');
+var cors = require('cors')
+
+var corsOptions = {
+  origin: 'http://www.aitsecurityguard.com',
+  optionsSuccessStatus: 200
+}
 
 router.get("/user", auth.authenticate(), function (req, res) {
   res.json(users[0]);
   //res.json(users[req.user.id]);
 });
 
-router.post("/token", function (req, res) {
+router.post("/token", cors(corsOptions), function (req, res, next) {
   var req_message = jsesc(req.body);
   payload = {
     "qname": "erp_request",
