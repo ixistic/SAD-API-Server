@@ -9,9 +9,15 @@ var request = require('request');
 var jsesc = require('jsesc');
 var cors = require('cors')
 
+var whitelist = ['https://aitsgmanager.mrteera.com', 'http://aitsgmanager.mrteera.com']
 var corsOptions = {
-  origin: 'https://aitsgmanager.mrteera.com',
-  optionsSuccessStatus: 200
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
 }
 
 router.get("/user", auth.authenticate(), function (req, res) {
