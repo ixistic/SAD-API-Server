@@ -10,7 +10,7 @@ var jsesc = require('jsesc');
 var cors = require('cors')
 
 var corsOptions = {
-  origin: 'http://www.aitsecurityguard.com',
+  origin: 'https://aitsgmanager.mrteera.com',
   optionsSuccessStatus: 200
 }
 
