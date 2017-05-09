@@ -11,6 +11,7 @@
     "cors": "^2.8.3",
     "debug": "~2.6.3",
     "express": "~4.15.2",
+    "express-fileuploader-s3": "0.0.1",
     "fcm-node": "^1.2.0",
     "jsesc": "^2.4.0",
     "jsonwebtoken": "^7.3.0",

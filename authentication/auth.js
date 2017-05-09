@@ -1,10 +1,10 @@
 // auth.js
 var passport = require("passport");
 var passportJWT = require("passport-jwt");
-var users = require("../authentication/users.js");
 var cfg = require("../authentication/config.js");
 var ExtractJwt = passportJWT.ExtractJwt;
 var Strategy = passportJWT.Strategy;
+var models = require('../models');
 var params = {
     secretOrKey: cfg.jwtSecret,
     jwtFromRequest: ExtractJwt.fromAuthHeader()
@@ -12,16 +12,13 @@ var params = {
 
 module.exports = function() {
     var strategy = new Strategy(params, function(payload, done) {
-      console.log(payload);
-      var user = users[0] || null;
-
-      if (user) {
-          return done(null, {
-              gid: user.gid
-          });
-      } else {
+      models.User.findOne({ where: {username: payload.username} }).then(function(user) {
+        if(user){
+          return done(null, user);
+        } else {
           return done(new Error("User not found"), null);
-      }
+        }
+      })
     });
     passport.use(strategy);
     return {

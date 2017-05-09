@@ -15,6 +15,8 @@ var FCM = require('fcm-node');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var incidents = require('./routes/incidents');
+var guards = require('./routes/guards');
 
 function deleteMessageFromERPResponseQueue(message_id) {
   request({
@@ -43,7 +45,7 @@ function sendFcmMessage(message,device_token,access_token) {
 
   fcm.send(message, function(err, response){
       if (err) {
-          console.log("Something has gone wrong!");
+          console.log("Something has gone wrong!",err);
       } else {
           console.log("Successfully sent with response: ", response);
       }
@@ -64,28 +66,36 @@ function pollingAuth() {
       console.log('Response:', resp_body);
       var message_id = JSON.parse(resp_body).id;
       var auth_body = JSON.parse(JSON.parse(resp_body).message);
-      var gid = auth_body.gid;
-      var g_name = auth_body.name;
+      var username = auth_body.gid;
+      var name = auth_body.name;
+      var role_name = auth_body.role;
       var device_token = auth_body.device_token;
       if (auth_body.auth == "true") {
         var payload = {
-          gid: gid
+          username: username
         };
         var token = jwt.encode(payload, cfg.jwtSecret);
-        models.Guard
-          .findOrCreate({where: {token: token}, defaults: {gid: gid, name: g_name, token: token}})
-          .spread(function(guard, created) {
-            console.log(guard.get({
+        models.Role
+          .findOrCreate({where: {name: role_name}, defaults: {name: role_name}})
+          .spread(function(role, created) {
+            console.log(role.get({
               plain: true
             }));
-            console.log("200 OK");
-            if(device_token)
-              sendFcmMessage("200 OK",device_token,token);
-            deleteMessageFromERPResponseQueue(message_id);
+            models.User
+              .findOrCreate({where: {token: token}, defaults: {username: username, name: name, token: token, RoleId: role.id}})
+              .spread(function(user, created) {
+                console.log(user.get({
+                  plain: true
+                }));
+                if(device_token)
+                  sendFcmMessage("authenticated",device_token,token);
+                deleteMessageFromERPResponseQueue(message_id);
+                console.log("200 OK");
+              })
           })
       } else {
         if(device_token)
-          sendFcmMessage("401 Unauthorized",device_token,"");
+          sendFcmMessage("unauthorized",device_token,"");
         deleteMessageFromERPResponseQueue(message_id);
         console.log("401 Unauthorized");
       }
@@ -111,6 +121,8 @@ app.use(auth.initialize());
 
 app.use('/', index);
 app.use('/', users);
+app.use('/', incidents);
+app.use('/', guards);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
