@@ -12,6 +12,7 @@ var cfg = require("./authentication/config.js");
 var request = require('request');
 var jwt = require("jwt-simple");
 var FCM = require('fcm-node');
+const fileUpload = require('express-fileupload');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -119,6 +120,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(auth.initialize());
 
+app.use(fileUpload());
 app.use('/', index);
 app.use('/', users);
 app.use('/', incidents);
