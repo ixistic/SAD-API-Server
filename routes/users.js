@@ -13,7 +13,7 @@ router.get("/user", auth.authenticate(), function (req, res) {
   //res.json(users[req.user.id]);
 });
 
-router.post("/token", cors(corsOptions), function (req, res) {
+router.post("/token", function (req, res) {
   var req_message = jsesc(req.body);
   payload = {
     "qname": "erp_request",
