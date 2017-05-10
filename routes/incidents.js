@@ -4,6 +4,7 @@ var router = express.Router();
 var auth = require("../authentication/auth.js")();
 var http = require('http');
 var s3 = require('s3');
+var FCM = require('fcm-node');
 const fileUpload = require('express-fileupload');
 
 var client = s3.createClient({
@@ -79,7 +80,33 @@ router.put("/incidents/:id", auth.authenticate(), function (req, res) {
     where: {id: id}
   }).then(function(incident) {
     if (incident) {
-      incident.update(req.body);
+      incident.update(req.body).then(function(incident){
+        if(status == "in progress"){
+          models.Device.findAll({
+            where: {UserId: assignee_id}
+          }).then(function(device_tokens) {
+            console.log(device_tokens);
+            var serverKey = 'AAAALDv0PMk:APA91bFz8ZKJVrqd6AVaaLJLPYU7UVaIhco4_DUzZft76tcttwf88SfVXEIhmZtS1MRW_WyppFU9I75mh9qsz1R7ARGPivFB3d7NJzOzcP9Qt8LHikDVz6tYVB42VqO-INJRfZLgnfS4'; //put your server key here
+            var fcm = new FCM(serverKey);
+
+            var message = {
+                to: device_tokens,
+
+                data: {
+                    incident: incident
+                }
+            };
+
+            fcm.send(message, function(err, response){
+                if (err) {
+                    console.log("Something has gone wrong!",err);
+                } else {
+                    console.log("Successfully sent with response: ", response);
+                }
+            });
+          })
+        }
+      });
       incident.updateAttributes({
         updated_by: user_id
       })
