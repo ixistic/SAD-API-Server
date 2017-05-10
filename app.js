@@ -106,7 +106,7 @@ function pollingAuth() {
     }
   });
 }
-// setInterval(pollingAuth, 3000);
+setInterval(pollingAuth, 3000);
 
 var app = express();
 

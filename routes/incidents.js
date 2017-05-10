@@ -75,7 +75,7 @@ router.put("/incidents/:id", auth.authenticate(), function (req, res) {
   var id = req.params.id;
   var user_id = req.user.id;
   var status = req.body.status;
-  var assignee_id = req.body.assignee;
+  var assignee_id = req.body.assignee_id;
   models.Incident.findOne({
     where: {id: id}
   }).then(function(incident) {
@@ -83,9 +83,12 @@ router.put("/incidents/:id", auth.authenticate(), function (req, res) {
       incident.update(req.body).then(function(incident){
         if(status == "in progress"){
           models.Device.findAll({
-            where: {UserId: assignee_id}
+            where: {UserId: assignee_id},
+            attributes: ['token']
           }).then(function(device_tokens) {
-            console.log(device_tokens);
+            console.log(assignee_id);
+            console.log(JSON.stringify(device_tokens));
+            
             var serverKey = 'AAAALDv0PMk:APA91bFz8ZKJVrqd6AVaaLJLPYU7UVaIhco4_DUzZft76tcttwf88SfVXEIhmZtS1MRW_WyppFU9I75mh9qsz1R7ARGPivFB3d7NJzOzcP9Qt8LHikDVz6tYVB42VqO-INJRfZLgnfS4'; //put your server key here
             var fcm = new FCM(serverKey);
 
@@ -123,11 +126,14 @@ router.post("/incidents", auth.authenticate(), function (req, res, next) {
  var image_url = null;
  let image_name = makeid();
  if (req.files) {
+   console.log('Has file');
    let image = req.files.image;
    let image_type = req.files.image.mimetype;
    image.mv(process.env.IMAGEPATH+'/uploads/image', function(err) {
-    if (err)
+    if (err){
+      console.log('Cannot upload file');
       return res.status(500).send(err);
+    }
     console.log('File uploaded!');
    });
    var params = {
