@@ -81,12 +81,13 @@ router.put("/incidents/:id", auth.authenticate(), function (req, res) {
   }).then(function(incident) {
     if (incident) {
       incident.update(req.body).then(function(incident){
+        console.log(status);
         if(status == "in progress"){
           models.Device.findAll({
             where: {UserId: assignee_id},
             attributes: ['token']
           }).then(function(device_tokens) {
-            // console.log(assignee_id);
+            console.log(assignee_id);
             // console.log(JSON.stringify(device_tokens));
             for(index in device_tokens) {
               var token = device_tokens[index].token;
