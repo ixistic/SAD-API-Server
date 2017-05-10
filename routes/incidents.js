@@ -117,11 +117,10 @@ router.post("/incidents", auth.authenticate(), function (req, res, next) {
  }
     models.Incident
       .create({title: title, detail: detail, latitude: latitude, longitude: longitude, status: "open", created_by: req.user.id, updated_by: req.user.id, image_url: image_url})
-      .spread(function(incident, created) {
+      .then(function(incident) {
         console.log(incident.get({
           plain: true
         }))
-        console.log(created);
         res.json(incident);
     })
 });
