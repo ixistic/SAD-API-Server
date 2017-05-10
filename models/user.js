@@ -23,6 +23,7 @@ module.exports = function(sequelize, DataTypes) {
         User.hasMany(models.Incident, {
           foreignKey: "assignee_id"
         });
+        User.hasMany(models.Device);
       }
     }
   });

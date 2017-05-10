@@ -84,13 +84,13 @@ router.post("/incidents", auth.authenticate(), function (req, res, next) {
  if (req.files) {
    let image = req.files.image;
    let image_type = req.files.image.mimetype;
-   image.mv('/Users/ixistic/Desktop/SAD-API-Server/uploads/image', function(err) {
+   image.mv(process.env.IMAGEPATH+'/uploads/image', function(err) {
     if (err)
       return res.status(500).send(err);
     console.log('File uploaded!');
    });
    var params = {
-     localFile: "/Users/ixistic/Desktop/SAD-API-Server/uploads/image",
+     localFile: process.env.IMAGEPATH+"/uploads/image",
 
      s3Params: {
        Bucket: "sad.ait.sg",

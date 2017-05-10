@@ -88,15 +88,18 @@ function pollingAuth() {
                 console.log(user.get({
                   plain: true
                 }));
-                if(device_token)
+                if(device_token){
                   sendFcmMessage("authenticated",device_token,token);
+                  models.Device.findOrCreate({where: {token: device_token}, defaults: {token: device_token, UserId: user.id}})
+                }
                 deleteMessageFromERPResponseQueue(message_id);
                 console.log("200 OK");
               })
           })
       } else {
-        if(device_token)
+        if(device_token){
           sendFcmMessage("unauthorized",device_token,"");
+        }
         deleteMessageFromERPResponseQueue(message_id);
         console.log("401 Unauthorized");
       }
