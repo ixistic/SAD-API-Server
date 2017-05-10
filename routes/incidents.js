@@ -86,27 +86,29 @@ router.put("/incidents/:id", auth.authenticate(), function (req, res) {
             where: {UserId: assignee_id},
             attributes: ['token']
           }).then(function(device_tokens) {
-            console.log(assignee_id);
-            console.log(JSON.stringify(device_tokens));
-            
-            var serverKey = 'AAAALDv0PMk:APA91bFz8ZKJVrqd6AVaaLJLPYU7UVaIhco4_DUzZft76tcttwf88SfVXEIhmZtS1MRW_WyppFU9I75mh9qsz1R7ARGPivFB3d7NJzOzcP9Qt8LHikDVz6tYVB42VqO-INJRfZLgnfS4'; //put your server key here
-            var fcm = new FCM(serverKey);
+            // console.log(assignee_id);
+            // console.log(JSON.stringify(device_tokens));
+            for(index in device_tokens) {
+              var token = device_tokens[index].token;
+              var serverKey = 'AAAALDv0PMk:APA91bFz8ZKJVrqd6AVaaLJLPYU7UVaIhco4_DUzZft76tcttwf88SfVXEIhmZtS1MRW_WyppFU9I75mh9qsz1R7ARGPivFB3d7NJzOzcP9Qt8LHikDVz6tYVB42VqO-INJRfZLgnfS4'; //put your server key here
+              var fcm = new FCM(serverKey);
 
-            var message = {
-                to: device_tokens,
+              var message = {
+                  to: token,
 
-                data: {
-                    incident: incident
-                }
-            };
+                  data: {
+                      incident: incident
+                  }
+              };
 
-            fcm.send(message, function(err, response){
-                if (err) {
-                    console.log("Something has gone wrong!",err);
-                } else {
-                    console.log("Successfully sent with response: ", response);
-                }
-            });
+              fcm.send(message, function(err, response){
+                  if (err) {
+                      console.log("Something has gone wrong!",err);
+                  } else {
+                      console.log("Successfully sent with response: ", response);
+                  }
+              });
+            }
           })
         }
       });
