@@ -116,7 +116,7 @@ router.post("/incidents", auth.authenticate(), function (req, res, next) {
    image_url = "https://s3-ap-southeast-1.amazonaws.com/sad.ait.sg/uploads/"+image_name;
  }
     models.Incident
-      .findOrCreate({defaults: {title: title, detail: detail, latitude: latitude, longitude: longitude, status: "open", created_by: req.user.id, updated_by: req.user.id, image_url: image_url}})
+      .create({title: title, detail: detail, latitude: latitude, longitude: longitude, status: "open", created_by: req.user.id, updated_by: req.user.id, image_url: image_url}})
       .spread(function(incident, created) {
         console.log(incident.get({
           plain: true
