@@ -33,9 +33,21 @@ function makeid()
 
 router.get("/incidents", auth.authenticate(), function (req, res) {
   var status = req.query.status;
+  var assignee_id = req.query.assignee_id;
   if(status) {
     models.Incident.findAll({
       where: {status: status},
+      include: [
+        { model: models.User , as: 'createdBy'},
+        { model: models.User , as: 'updatedBy'},
+        { model: models.User , as: 'assignee'}
+      ]
+    }).then(function(incidents) {
+      res.json(incidents);
+    })
+  } else if(assignee_id) {
+    models.Incident.findAll({
+      where: {assignee_id: assignee_id},
       include: [
         { model: models.User , as: 'createdBy'},
         { model: models.User , as: 'updatedBy'},
