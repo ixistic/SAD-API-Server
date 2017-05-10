@@ -31,15 +31,29 @@ function makeid()
 }
 
 router.get("/incidents", auth.authenticate(), function (req, res) {
-  models.Incident.findAll({
-    include: [
-      { model: models.User , as: 'createdBy'},
-      { model: models.User , as: 'updatedBy'},
-      { model: models.User , as: 'assignee'}
-    ]
-  }).then(function(incidents) {
-    res.json(incidents);
-  })
+  var status = req.query.status;
+  if(status) {
+    models.Incident.findAll({
+      where: {status: status},
+      include: [
+        { model: models.User , as: 'createdBy'},
+        { model: models.User , as: 'updatedBy'},
+        { model: models.User , as: 'assignee'}
+      ]
+    }).then(function(incidents) {
+      res.json(incidents);
+    })
+  } else {
+    models.Incident.findAll({
+      include: [
+        { model: models.User , as: 'createdBy'},
+        { model: models.User , as: 'updatedBy'},
+        { model: models.User , as: 'assignee'}
+      ]
+    }).then(function(incidents) {
+      res.json(incidents);
+    })
+  }
 });
 
 router.get("/incidents/:id", auth.authenticate(), function (req, res) {
