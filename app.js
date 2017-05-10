@@ -31,7 +31,7 @@ function deleteMessageFromERPResponseQueue(message_id) {
   });
 }
 
-function sendFcmMessage(message,device_token,access_token) {
+function sendFcmMessage(message,device_token,access_token,user_id) {
   var serverKey = 'AAAALDv0PMk:APA91bFz8ZKJVrqd6AVaaLJLPYU7UVaIhco4_DUzZft76tcttwf88SfVXEIhmZtS1MRW_WyppFU9I75mh9qsz1R7ARGPivFB3d7NJzOzcP9Qt8LHikDVz6tYVB42VqO-INJRfZLgnfS4'; //put your server key here
   var fcm = new FCM(serverKey);
 
@@ -40,6 +40,7 @@ function sendFcmMessage(message,device_token,access_token) {
 
       data: {
           access_token: access_token,
+          user_id: user_id,
           status: message
       }
   };
@@ -89,7 +90,7 @@ function pollingAuth() {
                   plain: true
                 }));
                 if(device_token){
-                  sendFcmMessage("authenticated",device_token,token);
+                  sendFcmMessage("authenticated",device_token,token,user.id);
                   models.Device.findOrCreate({where: {token: device_token}, defaults: {token: device_token, UserId: user.id}})
                 }
                 deleteMessageFromERPResponseQueue(message_id);
